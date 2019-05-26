@@ -151,4 +151,49 @@ export default class App extends Component {
     const dateString = moment(day).format('YYYY-DD-MM')
     return this.state.schedule[dateString] === true || moment(day).startOf('day').diff(moment().startOf('day')) < 0
   }
+  renderConfirmationString() {
+    const spanStyle = {color: '#00bcd4'}
+    return this.state.confirmationTextVisible ? <h2 style={{ textAlign: this.state.smallScreen ? 'center' : 'left', color: '#bdbdbd', lineHeight: 1.5, padding: '0 10px', fontFamily: 'Roboto'}}>
+      { <span>
+        Scheduling a
+
+          <span style={spanStyle}> 1 hour </span>
+
+        appointment {this.state.appointmentDate && <span>
+          on <span style={spanStyle}>{moment(this.state.appointmentDate).format('dddd[,] MMMM Do')}</span>
+      </span>} {Number.isInteger(this.state.appointmentSlot) && <span>at <span style={spanStyle}>{moment().hour(9).minute(0).add(this.state.appointmentSlot, 'hours').format('h:mm a')}</span></span>}
+      </span>}
+    </h2> : null
+  }
+
+  renderAppointmentTimes() {
+    if (!this.state.loading) {
+      const slots = [...Array(8).keys()]
+      return slots.map(slot => {
+        const appointmentDateString = moment(this.state.appointmentDate).format('YYYY-DD-MM')
+        const t1 = moment().hour(9).minute(0).add(slot, 'hours')
+        const t2 = moment().hour(9).minute(0).add(slot + 1, 'hours')
+        const scheduleDisabled = this.state.schedule[appointmentDateString] ? this.state.schedule[moment(this.state.appointmentDate).format('YYYY-DD-MM')][slot] : false
+        const meridiemDisabled = this.state.appointmentMeridiem ? t1.format('a') === 'am' : t1.format('a') === 'pm'
+        return <RadioButton
+          label={t1.format('h:mm a') + ' - ' + t2.format('h:mm a')}
+          key={slot}
+          value={slot}
+          style={{marginBottom: 15, display: meridiemDisabled ? 'none' : 'inherit'}}
+          disabled={scheduleDisabled || meridiemDisabled}/>
+      })
+    } else {
+      return null
+    }
+  }
+
+  renderAppointmentConfirmation() {
+    const spanStyle = { color: '#00bcd4' }
+    return <section>
+      <p>Name: <span style={spanStyle}>{this.state.firstName} {this.state.lastName}</span></p>
+      <p>Number: <span style={spanStyle}>{this.state.phone}</span></p>
+      <p>Email: <span style={spanStyle}>{this.state.email}</span></p>
+      <p>Appointment: <span style={spanStyle}>{moment(this.state.appointmentDate).format('dddd[,] MMMM Do[,] YYYY')}</span> at <span style={spanStyle}>{moment().hour(9).minute(0).add(this.state.appointmentSlot, 'hours').format('h:mm a')}</span></p>
+    </section>
+  }
 }
