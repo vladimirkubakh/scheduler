@@ -147,5 +147,8 @@ export default class App extends Component {
     const regex = /^(1\s|1|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/
     return regex.test(phoneNumber) ? this.setState({ phone: phoneNumber, validPhone: true }) : this.setState({ validPhone: false })
   }
-
+  checkDisableDate(day) {
+    const dateString = moment(day).format('YYYY-DD-MM')
+    return this.state.schedule[dateString] === true || moment(day).startOf('day').diff(moment().startOf('day')) < 0
+  }
 }
