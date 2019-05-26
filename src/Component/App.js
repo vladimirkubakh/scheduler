@@ -65,4 +65,57 @@ export default class App extends Component {
     this.resize = this.resize.bind(this)
   }
 
+  handleNavToggle() {
+    return this.setState({ navOpen: !this.state.navOpen })
+  }
+
+  handleNextStep() {
+    const { stepIndex } = this.state
+    return (stepIndex < 3) ? this.setState({ stepIndex: stepIndex + 1}) : null
+  }
+
+  handleSetAppointmentDate(date) {
+    this.handleNextStep()
+    this.setState({ appointmentDate: date, confirmationTextVisible: true })
+  }
+
+  handleSetAppointmentSlot(slot) {
+    this.handleNextStep()
+    this.setState({ appointmentSlot: slot })
+  }
+
+  handleSetAppointmentMeridiem(meridiem) {
+    this.setState({ appointmentMeridiem: meridiem})
+  }
+
+  handleFetch(response) {
+    const { configs, appointments } = response
+    const initSchedule = {}
+    const today = moment().startOf('day')
+    initSchedule[today.format('YYYY-DD-MM')] = true
+    const schedule = !appointments.length ? initSchedule : appointments.reduce((currentSchedule, appointment) => {
+      const { date, slot } = appointment
+      const dateString = moment(date, 'YYYY-DD-MM').format('YYYY-DD-MM')
+      !currentSchedule[date] ? currentSchedule[dateString] = Array(8).fill(false) : null
+      Array.isArray(currentSchedule[dateString]) ?
+        currentSchedule[dateString][slot] = true : null
+      return currentSchedule
+    }, initSchedule)
+
+    //Imperative x 100, but no regrets
+    for (let day in schedule) {
+      let slots = schedule[day]
+      slots.length ? (slots.every(slot => slot === true)) ? schedule[day] = true : null : null
+    }
+
+    this.setState({
+      schedule,
+      siteTitle: configs.site_title,
+      aboutPageUrl: configs.about_page_url,
+      contactPageUrl: configs.contact_page_url,
+      homePageUrl: configs.home_page_url,
+      loading: false
+    })
+  }
+
 }
