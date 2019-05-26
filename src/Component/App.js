@@ -118,4 +118,25 @@ export default class App extends Component {
     })
   }
 
+  handleFetchError(err) {
+    console.log(err)
+    this.setState({ confirmationSnackbarMessage: 'Error fetching data', confirmationSnackbarOpen: true })
+  }
+
+  handleSubmit() {
+    const appointment = {
+      date: moment(this.state.appointmentDate).format('YYYY-DD-MM'),
+      slot: this.state.appointmentSlot,
+      name: this.state.firstName + ' ' + this.state.lastName,
+      email: this.state.email,
+      phone: this.state.phone
+    }
+    axios.post(HOST + 'api/appointments', appointment)
+    .then(response => this.setState({ confirmationSnackbarMessage: "Appointment succesfully added!", confirmationSnackbarOpen: true, processed: true }))
+    .catch(err => {
+      console.log(err)
+      return this.setState({ confirmationSnackbarMessage: "Appointment failed to save.", confirmationSnackbarOpen: true })
+    })
+  }
+
 }
