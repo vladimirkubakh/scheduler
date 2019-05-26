@@ -196,4 +196,30 @@ export default class App extends Component {
       <p>Appointment: <span style={spanStyle}>{moment(this.state.appointmentDate).format('dddd[,] MMMM Do[,] YYYY')}</span> at <span style={spanStyle}>{moment().hour(9).minute(0).add(this.state.appointmentSlot, 'hours').format('h:mm a')}</span></p>
     </section>
   }
+
+   resize() {
+    this.setState({ smallScreen: window.innerWidth < 768 })
+  }
+
+  componentWillMount() {
+    async.series({
+      configs(callback) {
+        axios.get(HOST + 'api/config').then(res =>
+          callback(null, res.data.data)
+        )
+      },
+      appointments(callback) {
+        axios.get(HOST + 'api/appointments').then(res => {
+          callback(null, res.data.data)
+        })
+      }
+    }, (err,response) => {
+      err ? this.handleFetchError(err) : this.handleFetch(response)
+    })
+    addEventListener('resize', this.resize)
+  }
+
+  componentWillUnmount() {
+    removeEventListener('resize', this.resize)
+  }
 }
